@@ -8,5 +8,4 @@ def hello():
 
 @app.route("/profile")
 def profile():
-    entires = {"profession" : user.profession()}
-    return render_template('profile.html', entries=entries)
+    return render_template('profile.html', profession=user.profession(), user="test_user")
