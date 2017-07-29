@@ -2,9 +2,10 @@
 <title>User-Identity</title>
 <body>This user is: 
   <h2>{{user}}</h2>
-  <form 
-    <dl>
-      <dt>Profession: {{ profession }}
-    </dl>
+  <form
+  <ul>
+  	{% for entry in entries %}
+		<dt> {{ entry.left }} : {{ entry.right }}
+	{% endfor %}
   </form>
 
