@@ -8,4 +8,6 @@ def hello():
 
 @app.route("/profile")
 def profile():
-    return render_template('profile.html', profession=user.profession(), user="test_user")
+    profession = user.profession()
+    entries = [{"left" : "profession", "right" : profession}]
+    return render_template('profile.html', profession=profession, user="test_user", entries=entries)
