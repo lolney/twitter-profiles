@@ -1,3 +1,17 @@
 <!doctype html>
 <title>Twitter-Profiles</title>
-<body>Hello, world!</body>
+<html>
+<head>
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap-3.3.7-dist/css/bootswach-theme.css') }}">
+<head>
+<body>
+
+<p> Enter a Twitter username into the field below and then click "Submit". </p>
+<form action="/profile">
+Twitter username: <input type="text" name="UserName" value="username"><br>
+<input type="submit" value="Submit">
+</form>
+
+</body>
+</html>
+
