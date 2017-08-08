@@ -1,5 +1,4 @@
 from pycorenlp import StanfordCoreNLP
-from stanfordcorenlp import StanfordCoreNLP as StanfordCoreNLP2
 import json
 
 CORENLP_DIRECTORY = r'/Users/Luke/Downloads/stanford-corenlp-full-2017-06-09'
@@ -26,8 +25,9 @@ class NLPWrapper:
     def openie_relation(self, tweets, relations):
         punctuation = ['.','?','!']
         modtweets = map(lambda t : t if t[len(t) - 1] in punctuation else t + '.', tweets)
-        text = " ".join(modtweets).encode()
-        sentences = self.openie(" ".join(text))
+        print modtweets
+        text = " ".join(modtweets).encode('ascii','replace')
+        sentences = self.openie(text)
         filtered = filter(lambda s : s['relation'] in relations, sentences)
         return [s['object'] for s in filtered]
 

@@ -47,27 +47,41 @@ def _parse_pattern(word, i, j):
 def parse_pattern(lst):
     return apply_tuple(_parse_pattern, lst.split(" "), 0, 0)
 
-def profession():
-    extractor = ConllExtractor()
-    tweet = TextBlob(TWEET, np_extractor=extractor)
-    return tweet.noun_phrases[0]
+class User:
 
-def interests(user):
-    nlp = NLPWrapper()
-    statuses = tweets.get_statuses(user)
-    candidates = nlp.openie_relation(statuses, ['like','love'])
-    print candidates
+    def __init__(self, user=None, screen_name=None):
+        if user is None and screen_name is None:
+            raise ValueError("Must initialize with either user id or screen name")
+        self.screen_name = screen_name
+        self.user = user
+        self.nlp = NLPWrapper()
 
-def location(user):
-    nlp = NLPWrapper()
-    statuses = [status.text for status in tweets.get_statuses(user)]
-    candidates = nlp.openie_relation(statuses, ['live in'])
-    print candidates
+    def profession(self):
+        extractor = ConllExtractor()
+        tweet = TextBlob(TWEET, np_extractor=extractor)
+        return tweet.noun_phrases[0]
+
+    def interests(self):
+        statuses = [status.text for status in self.get_statuses()]
+        candidates = self.nlp.openie_relation(statuses, ['like','love'])
+        return candidates
+
+    def location(self):
+        nlp = NLPWrapper()
+        statuses = [status.text for status in self.get_statuses()]
+        candidates = self.nlp.openie_relation(statuses, ['live in'])
+        return candidates
+
+    def get_statuses(self):
+        if self.screen_name is not None:
+            return [status.text for status in tweets.get_statuses(screen_name=self.screen_name)]
+        elif self.user is not None:
+            return [status.text for status in tweets.get_statuses(self.user)]
 
 def trump_test():
     extractor = ConllExtractor()
     nltk_tagger = NLTKTagger()
-    statuses = tweets.get_statuses(25073877)
+    statuses = tweets.get_statuses(user=25073877)
 
     for status in statuses:
         tweet = TextBlob(status.text, np_extractor=extractor, pos_tagger=nltk_tagger)
@@ -80,7 +94,7 @@ def trump_test():
                 print noun
 
 def main():
-    location(25073877)
+    interests('billclinton')
 
 if __name__ == "__main__":
     main()
