@@ -59,7 +59,7 @@ class User:
     def profession(self):
         extractor = ConllExtractor()
         tweet = TextBlob(TWEET, np_extractor=extractor)
-        return tweet.noun_phrases[0]
+        return tweet.noun_phrases
 
     def interests(self):
         statuses = self.get_statuses()
