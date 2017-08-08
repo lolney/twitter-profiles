@@ -62,13 +62,12 @@ class User:
         return tweet.noun_phrases[0]
 
     def interests(self):
-        statuses = [status.text for status in self.get_statuses()]
+        statuses = self.get_statuses()
         candidates = self.nlp.openie_relation(statuses, ['like','love'])
         return candidates
 
     def location(self):
-        nlp = NLPWrapper()
-        statuses = [status.text for status in self.get_statuses()]
+        statuses = self.get_statuses()
         candidates = self.nlp.openie_relation(statuses, ['live in'])
         return candidates
 
