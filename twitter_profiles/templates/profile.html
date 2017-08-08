@@ -9,9 +9,15 @@
   <form
   <ul>
   	{% for entry in entries %}
-		<li> {{ entry.left }} : {{ entry.right }}
+		<li> {{ entry.left }} :
+      <ul>
+        {% for entry in entry.right%}
+        <li> {{ entry }} </li>
+        {% endfor %}
+      </ul>
+    </li>
 	{% endfor %}
-  <ul>
+  </ul>
   </form>
   </html>
 
