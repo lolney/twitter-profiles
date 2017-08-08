@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from user import User
-import twitter
+from twitter import TwitterError
 app = Flask(__name__)
 
 @app.route("/")
@@ -16,13 +16,15 @@ def profile():
         interests = user.interests()
         location = user.location()
 
+        entries = [entry("Profession", profession)]
+
         if len(location) > 0:
             entries.append(entry("Location", location))
         if len(interests) > 0:
             entries.append(entry("Interests", interests))
 
         return render_template('profile.html', user=screen_name, entries=entries)
-    except twitter.TwitterError:
+    except TwitterError:
         return render_template('profile.html', notfound=True)
 
     
