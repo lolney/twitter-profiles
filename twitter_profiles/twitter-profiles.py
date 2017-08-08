@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from user import User
+import twitter
 app = Flask(__name__)
 
 @app.route("/")
@@ -21,7 +22,7 @@ def profile():
             entries.append(entry("Interests", interests))
 
         return render_template('profile.html', user=screen_name, entries=entries)
-    except TwitterException:
+    except twitter.TwitterError:
         return render_template('profile.html', notfound=True)
 
     
