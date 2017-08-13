@@ -6,7 +6,10 @@ Download the CoreNLP library from https://stanfordnlp.github.io/CoreNLP/, then n
 
 # Running the webserver
 
+Install requirements
 ```pip install -r requirements.txt
-cd twitter_profiles
-sudo python -m textblob.download_corpora
+sudo python -m textblob.download_corpora```
+
+Running:
+```cd twitter_profiles
 FLASK_APP=twitter-profiles.py python -m flask run```
