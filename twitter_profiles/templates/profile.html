@@ -2,7 +2,8 @@
 <html>
 <head>
 	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap-3.3.7-dist/css/bootswach-theme.css') }}">
-<head>
+  <script src="https://d3js.org/d3.v4.js"></script>
+</head>
 <title>User-Identity</title>
 <body>This user is: 
   <h2>{{user}}</h2>
@@ -19,12 +20,8 @@
 	{% endfor %}
   </ul>
   </form>
-  </html>
-
-//clustertree
-
-<meta charset="utf-8" />
 <style>
+
 .node circle {
   fill: #999;
 }
@@ -50,4 +47,8 @@
 
 </style>
 <svg width="960" height="2000"></svg>
+<script src="{{url_for('static', filename='clustertree.js')}}"></script>
 
+
+</body>
+</html>
