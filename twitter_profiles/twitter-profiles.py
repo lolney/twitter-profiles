@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from user import User
 from twitter import TwitterError
 app = Flask(__name__)
@@ -7,10 +7,9 @@ app = Flask(__name__)
 def hello():
     return render_template('index.html')
 
-@app.route("/profile")
-def profile():
-    screen_name = request.args.get('UserName', '')
-    user = User(screen_name=screen_name)
+@app.route("/profile/<username>")
+def profile(username):
+    user = User(screen_name=username)
     try:
         profession = user.profession()
         interests = user.interests()
@@ -23,11 +22,13 @@ def profile():
         if len(interests) > 0:
             entries.append(entry("Interests", interests))
 
-        return render_template('profile.html', user=screen_name, entries=entries)
+        return render_template('profile.html', user=username, entries=entries)
     except TwitterError:
         return render_template('profile.html', notfound=True)
 
-    
+@app.route("/profile/<username>/frequencies", methods=['GET'])
+def frequencies(username):
+    return jsonify([["interest1",50],["interest2",50]])
 
 def entry(title, content):
     return {"left" : title, "right": content}

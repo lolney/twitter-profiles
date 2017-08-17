@@ -1,2 +1,4 @@
 
 envvars.sh
+
+*.pyc

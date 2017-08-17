@@ -6,9 +6,19 @@
 <head>
 <body>
 
+<script>
+function process()
+{
+var url=location.href + 'profile/' + document.getElementById("username").value;
+location.href=url;
+return false;
+}
+</script>
+
+
 <p> Enter a Twitter username into the field below and then click "Submit". </p>
-<form action="/profile">
-Twitter username: <input type="text" name="UserName" value="username"><br>
+<form onSubmit="return process()">
+Twitter username: <input type="text" name="UserName" value="username" id="username"><br>
 <input type="submit" value="Submit">
 </form>
 
