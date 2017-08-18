@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, jsonify
+import StringIO
+import csv
+from flask import Flask, render_template, request, jsonify, make_response
 from user import User
 from twitter import TwitterError
 app = Flask(__name__)
@@ -34,10 +36,18 @@ def frequencies(username):
 def categories(username):
     return jsonify(get_categories(username))
 
-@app.route("/profile/<username>/categories/formated", methods=['GET'])
-def formatted(username):
+@app.route("/profile/<username>/categories/csv", methods=['GET'])
+def categories_csv(username):
     cats = get_categories(username)
-    return jsonify(formatcats("", cats))
+    csvList = formatcats("", cats)
+
+    si = StringIO.StringIO()
+    cw = csv.DictWriter(si, fieldnames=['id','value'])
+    cw.writeheader()
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 def get_categories(username):
     return {"Sports":
@@ -57,10 +67,11 @@ def formatcats(super, cats):
     for cat, subcats in cats.iteritems():
         if type(subcats) is list:
             if len(subcats) == 0:
-                ret = ret + [super + cat]
+                ret = ret + [{'id':super + cat, 'value':0}]
             else:
-                ret = ret + [super + cat + "." + subcat for subcat in subcats]
+                ret = ret + [{'id':super + cat + "." + subcat, 'value':0} for subcat in subcats]
         else:
+            ret = ret + [{'id':super + cat, 'value':None}]
             ret = ret + formatcats(super + cat + ".", subcats)
     return ret
 
