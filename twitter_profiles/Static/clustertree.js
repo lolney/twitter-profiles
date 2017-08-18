@@ -1,9 +1,35 @@
+d3.csv(location.origin + "/profile/username/categories/csv", function(error, data) {
+  if (error) throw error;
+  
+  var size = data.length;
+  var pds = 0;
+  var maxpds = 0;
 
-
-var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height"),
-    g = svg.append("g").attr("transform", "translate(40,0)");
+for (var i = 0; i < size; i++) {
+  pds = ((data[i]["id"]).match(/\./g) || []).length;
+  if (pds > maxpds) {
+    maxpds = pds;
+  }
+}
+  
+  var svg = d3.select("svg");
+  var width = window.innerWidth - 100;
+  var height = 2000;
+  
+  
+// width based on depth of tree  
+  if (maxpds < 5) {
+    width = 700;
+  }
+  
+// height based on number of nodes
+  height = 20 * size;
+  
+  svg.attr("width", width);
+  svg.attr("height", height);
+  
+    var g = svg.append("g").attr("transform", "translate(40,0)");
+  
 
 var tree = d3.cluster()
     .size([height, width - 160]);
@@ -11,11 +37,10 @@ var tree = d3.cluster()
 var stratify = d3.stratify()
     .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
 
-d3.csv("profile/username/categories/csv", function(error, data) {
-  if (error) throw error;
-
   var root = stratify(data)
       .sort(function(a, b) { return (a.height - b.height) || a.id.localeCompare(b.id); });
+  
+
 
   tree(root);
 
