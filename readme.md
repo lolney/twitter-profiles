@@ -4,6 +4,16 @@ Download the CoreNLP library from https://stanfordnlp.github.io/CoreNLP/, then n
 
 ``` java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 150000 ```
 
+# Setting up the database
+
+``` sh database.sh ```
+
+Run the mysql daemon:
+``` mysqld ```
+
+Dumping the filteredcategories table:
+```mysqldump -u root -p enwiki filteredcategories > ~/Downloads/filteredcategories.sql```
+
 # Running the webserver
 
 Install requirements
