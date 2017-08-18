@@ -1,11 +1,8 @@
 $.get("http://localhost:5000/profile/Test/frequencies", function(interests, status){
 
-var chart = c3.generate({
+var chart = bb.generate({
     data: {
-        columns: [
-//            ['data1', 30],
-//            ['data2', 120],
-        ],
+        columns: interests,
         type : 'donut',
         onclick: function (d, i) { console.log("onclick", d, i); },
         onmouseover: function (d, i) { console.log("onmouseover", d, i); },
