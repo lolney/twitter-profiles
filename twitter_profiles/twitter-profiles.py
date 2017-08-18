@@ -69,7 +69,7 @@ def formatcats(super, cats):
             if len(subcats) == 0:
                 ret = ret + [{'id':super + cat, 'value':0}]
             else:
-                ret = ret + [{'id':super + cat + "." + subcat, 'value':0} for subcat in subcats]
+                ret = ret + [{'id':super + cat, 'value':0}]+ [{'id':super + cat + "." + subcat, 'value':0} for subcat in subcats]
         else:
             ret = ret + [{'id':super + cat, 'value':None}]
             ret = ret + formatcats(super + cat + ".", subcats)
