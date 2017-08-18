@@ -1,9 +1,4 @@
-$.get("http://localhost:5000/profile/Test/frequencies", function(data, status)
-    {var interests = [
-            ["setosa", 33.33],
-            ["versicolor", 33.33],
-            ["virginica", 33.33],
-        ]
+$.get("http://localhost:5000/profile/Test/frequencies", function(interests, status){
 
 var chart = c3.generate({
     data: {
