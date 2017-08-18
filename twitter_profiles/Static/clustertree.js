@@ -11,7 +11,7 @@ var tree = d3.cluster()
 var stratify = d3.stratify()
     .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
 
-d3.csv("https://raw.githubusercontent.com/lolney/twitter-profiles/master/flare.csv", function(error, data) {
+d3.csv("profile/username/categories/csv", function(error, data) {
   if (error) throw error;
 
   var root = stratify(data)
