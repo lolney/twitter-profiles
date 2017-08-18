@@ -25,10 +25,10 @@ for (var i = 0; i < size; i++) {
 // height based on number of nodes
   height = 20 * size;
   
-  svg.attr("width", width + 50);
+  svg.attr("width", width + 150);
   svg.attr("height", height);
   
-    var g = svg.append("g").attr("transform", "translate(40,0)");
+    var g = svg.append("g").attr("transform", "translate(100,0)");
   
 
 var tree = d3.cluster()
