@@ -50,17 +50,19 @@ def categories_csv(username):
     return output
 
 def get_categories(username):
-    return {"Sports":
-        {
-            "Baseball" : [],
-            "Track and Field" : ["800m"]
-        },
-    "Creative":
-        {
-            "Writing" : {"Fiction" : ["Poetry", "Short stories"]}
-        },
-    "Formal studies": ["Mathematics"]
-    } 
+    return {"interests":
+        {"Sports":
+            {
+                "Baseball" : [],
+                "Track and Field" : ["800m"]
+            },
+        "Creative":
+            {
+                "Writing" : {"Fiction" : ["Poetry", "Short stories"]}
+            },
+        "Formal studies": ["Mathematics"]
+        }
+    }
 
 def formatcats(super, cats):
     ret = []
