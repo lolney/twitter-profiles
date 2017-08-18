@@ -30,5 +30,39 @@ def profile(username):
 def frequencies(username):
     return jsonify([["interest1",50],["interest2",50]])
 
+@app.route("/profile/<username>/categories", methods=['GET'])
+def categories(username):
+    return jsonify(get_categories(username))
+
+@app.route("/profile/<username>/categories/formated", methods=['GET'])
+def formatted(username):
+    cats = get_categories(username)
+    return jsonify(formatcats("", cats))
+
+def get_categories(username):
+    return {"Sports":
+        {
+            "Baseball" : [],
+            "Track and Field" : ["800m"]
+        },
+    "Creative":
+        {
+            "Writing" : {"Fiction" : ["Poetry", "Short stories"]}
+        },
+    "Formal studies": ["Mathematics"]
+    } 
+
+def formatcats(super, cats):
+    ret = []
+    for cat, subcats in cats.iteritems():
+        if type(subcats) is list:
+            if len(subcats) == 0:
+                ret = ret + [super + cat]
+            else:
+                ret = ret + [super + cat + "." + subcat for subcat in subcats]
+        else:
+            ret = ret + formatcats(super + cat + ".", subcats)
+    return ret
+
 def entry(title, content):
     return {"left" : title, "right": content}
