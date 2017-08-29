@@ -41,6 +41,11 @@ class FilteredCategory(Base):
     subcat_id = Column(Integer, primary_key=True)
     subcat = Column(String(255))
 
+class User(Base):
+
+    __tablename__ = 'users'
+    
+
 class Category():
 
     def __init__(self, name, parent=None, decay_factor=1):
@@ -129,7 +134,10 @@ class DBSession():
     def getPage(self, title):
         return self.session.query(Page).filter_by(page_title = title).one()
 
-     
+def categories(candidates):
+    session = DBSession()
+    return session.categories_from_candidates()
+
 if __name__ == "__main__":
     session = DBSession()
     print session.createCats()

@@ -28,6 +28,14 @@ def profile(username):
     except TwitterError:
         return render_template('profile.html', notfound=True)
 
+@app.route('/username/<username>', methods=['PUT'])
+def username(username):
+    try:
+        user = User(screen_name=username, create=True)
+        return "", 200
+    except TwitterError:
+        return "Twitter username does not exist", 400
+
 @app.route("/profile/<username>/frequencies", methods=['GET'])
 def frequencies(username):
     return jsonify([["interest1",50],["interest2",50]])

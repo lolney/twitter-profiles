@@ -8,6 +8,12 @@ class NLPWrapper:
     def __init__(self):
         self.nlp = StanfordCoreNLP('http://localhost:9000')
 
+    def clean_tweets(self, tweets):
+        punctuation = ['.','?','!']
+        modtweets = map(lambda t : t if t[len(t) - 1] in punctuation else t + '.', tweets)
+        text = " ".join(modtweets).encode('ascii','replace')
+        return text
+
     def parse(self, tweet):
         output = self.nlp.annotate(tweet, properties=
         {'annotators': 'tokenize,ssplit,pos,lemma,ner,parse,depparse','outputFormat':'json'})
@@ -23,13 +29,15 @@ class NLPWrapper:
         return outlist
 
     def openie_relation(self, tweets, relations):
-        punctuation = ['.','?','!']
-        modtweets = map(lambda t : t if t[len(t) - 1] in punctuation else t + '.', tweets)
-        print modtweets
-        text = " ".join(modtweets).encode('ascii','replace')
+        text = self.clean_tweets(tweets)
         sentences = self.openie(text)
         filtered = filter(lambda s : s['relation'] in relations, sentences)
         return [s['object'] for s in filtered]
+
+    def entities(self, tweets):
+        text = self.clean_tweets(tweets)
+        sentences = self.openie(text)
+        return sentences
 
 def test():
     with open(CORENLP_DIRECTORY + "/presidents.txt.json") as fp:
@@ -65,7 +73,8 @@ class ParseTree:
         self.pos = pos
 
 def main():
-    nlp_wrapper2("I am a professional photographer who lives in Boise, ID")
+    nlp = NLPWrapper()
+    print nlp.entities(["I am a professional photographer who lives in Boise, ID", "The quick brown fox jumped over the lazy dog.", "I like barn raising."])
 
 if __name__ == "__main__":
     main()

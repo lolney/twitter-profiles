@@ -6,6 +6,7 @@ import tweets
 import pattern
 from pattern.text import find_relations
 from corenlp import NLPWrapper
+from wikipedia import DBSession
 
 TWEET = "I am a professional photographer who lives in Boise, ID"
 TWEET1 = "I work as a professional photographer"
@@ -49,9 +50,12 @@ def parse_pattern(lst):
 
 class User:
 
-    def __init__(self, user=None, screen_name=None):
+    def __init__(self, user=None, screen_name=None, create=False):
         if user is None and screen_name is None:
             raise ValueError("Must initialize with either user id or screen name")
+        if create:
+
+        self.session = DBSession()
         self.screen_name = screen_name
         self.user = user
         self.nlp = NLPWrapper()
@@ -70,6 +74,10 @@ class User:
         statuses = self.get_statuses()
         candidates = self.nlp.openie_relation(statuses, ['live in'])
         return candidates
+
+    def categories(self):
+        statuses = self.get_statuses()
+
 
     def get_statuses(self):
         if self.screen_name is not None:
