@@ -1,7 +1,7 @@
-path = location.path.split('/');
+path = location.pathname.split('/');
 username = path[2];
 
-d3.csv(location.origin + "/profile/" + username + "username/categories/csv", function(error, data) {
+d3.csv(location.origin + "/profile/" + username + "/categories/csv", function(error, data) {
   if (error) throw error;
   
   var size = data.length;

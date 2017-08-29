@@ -1,4 +1,4 @@
-path = location.path.split('/');
+path = location.pathname.split('/');
 username = path[2];
 
 $.get("http://localhost:5000/profile/" + username + "/frequencies", function(interests, status){
