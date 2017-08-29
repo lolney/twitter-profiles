@@ -64,20 +64,75 @@ Session = create_sessionmaker()
 
 class Category():
 
-    def __init__(self, name, parent=None, decay_factor=1):
+    def __init__(self, name, parent=None,children=[],decay_rate=1):
         self.name = name
         self.parent = parent
-        self.count = 1
-        self.children = None
-        self.decay_factor = decay_factor
+        self.count = 0
+        self.children = children
+        self.decay_rate = decay_rate
 
-    def inc(self):
-        self.count = count + (1 * self.decay_factor)
+    def count_up(self):
+        self.__count_up__(1)
+
+    def __count_up__(self, decay):
+        self.count = self.count + decay
+        if self.parent is not None:
+            self.parent.__count_up__(self.decay_rate*decay)
 
     def add_child(self, child):
-        if self.children is None:
-            self.children = []
         self.children.append(child)
+
+    def child_has_children(self):
+        for child in self.children:
+            if len(child.children) > 0:
+                return True
+        return False
+
+    def sibling_has_children(self):
+        if self.parent is None:
+            return False
+        else:
+            return self.parent.child_has_children()
+
+    def traverse(self, action):
+        action(self)
+        for child in self.children:
+            child.traverse(action)
+
+    def traverse_up(self, action):
+        action(self)
+        if self.parent is not None:
+            self.parent.traverse_up(action)
+
+    def get_frequencies(self):
+        lst = [[self.name, self.count]]
+        for child in self.children:
+            lst += child.get_frequencies()
+        return lst
+
+    def to_json(self):
+        # Must be formatted as a dictionary
+        if len(self.children) > 0 or self.sibling_has_children():
+            children = map(lambda x: x.to_json(), self.children)
+            # Children are keys in dictionary
+            if self.child_has_children():
+                merged = {}
+                for child in children:
+                    key = child.keys()[0]
+                    merged[key] = child[key]
+                return {self.name: merged}
+            # Children are a list (terminal)
+            else:
+                return {self.name: children}
+        # Is part of a list (terminal)
+        else:
+            return self.name
+
+    def __format__(self, fmt):
+        if len(self.children < 1):
+            return self.name
+        else:
+            return self.name + ": {" + ", ".join(map(str, self.Children)) + "}"
 
 class DBSession():
 
@@ -94,7 +149,7 @@ class DBSession():
             if cmap[candidate] is None:
                 cmap[candidate] = self.traverse_up(candidate)
             else:
-                self.traverse_up_objects(cmap[candidate])
+                cmap[candidate].count_up()
         return self.find_children(cmap)
 
     def find_children(self, candidate_map):
@@ -106,6 +161,7 @@ class DBSession():
                         cat.add_child(child_cat)
             if cat.parent is None:
                 root_cats.append(cat)
+        return Category("Interests",children=root_cats,is_dummy=True)
 
                 
     def traverse_up(self, text):
@@ -115,11 +171,6 @@ class DBSession():
             return Category(name=text)
         else:
             return Category(name=text,parent=traverse_up(session, cat.cl_to))
-
-    def traverse_up_objects(self, cat):
-        if cat is not None:
-            cat.inc()
-            traverse_up_objects(cat.super)
 
     def traverse_down(self, visited, supercat_id, supercat):
         # 14 is the category namespace; 0 is the page namespace
@@ -153,6 +204,18 @@ class DBSession():
     def get_user(self, user_id):
         return self.session.query(User).filter_by(user_id = user_id).one_or_none()
 
+    def get_categories(self, user_id):
+        return self.session.query(User).filter_by(user_id = user_id).one().categories
+
+    def get_frequencies(self, user_id):
+        return [[x.interest, x.weight] for x in
+            self.session.query(Interests).filter_by(user_id = user_id)]
+
+    def save_frequencies(self, user_id, frequencies):
+        for row in frequencies:
+            self.session.add(Interests(user_id=user_id, interest=row[0], weight=row[1]))
+        self.session.commit()
+
     def getCategories(self):
         return self.session.query(Categorylinks).join(Page, Page.page_id==Categorylinks.cl_from).limit(10)
 
@@ -166,3 +229,51 @@ def categories(candidates):
 if __name__ == "__main__":
     session = DBSession()
     print session.createCats()
+
+def find_parents(top):
+    for child in top.children:
+        child.parent = top
+        find_parents(child)
+
+def test_category():
+    json = {"Interests":
+        {"Sports":
+            {
+                "Baseball" : [],
+                "Track and Field" : ["800m"]
+            },
+        "Creative":
+            {
+                "Writing" : {"Fiction" : ["Poetry", "Short stories"]}
+            },
+        "Formal studies": ["Mathematics"]
+        }
+    }
+    objects = Category("Interests", children=[
+            Category("Sports", children=[
+                    Category("Baseball"),
+                    Category("Track and Field", children=[Category("800m")]),
+                ]),
+            Category('Formal studies', children=[Category("Mathematics")]),
+            Category("Creative", children=
+                    [Category("Writing", children=[
+                        Category("Fiction", children=[
+                            Category("Poetry"), Category("Short stories")])])]),
+        ])
+    frequencies = [
+        ["Baseball", 1],
+        ["Track and Field", 2],
+        ['800m', 1],
+        ['Sports', 4],
+        ['Creative', 5],
+        ['Fiction', 3],
+        ['Formal studies', 2],
+        ['Interests', 12],
+        ['Mathematics', 1],
+        ['Poetry', 1],
+        ['Short stories', 1],
+        ['Writing', 4]]
+    find_parents(objects)
+    objects.traverse(lambda x: x.count_up())
+    assert json == objects.to_json()
+    assert sorted(frequencies) == sorted(objects.get_frequencies())

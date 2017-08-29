@@ -55,7 +55,7 @@ def username(username):
         user = users.get_user(username)
         return "", 200
     except TwitterError as e:
-        return str(e), 400
+        return e[0][0]['message'], 400
 
 @app.route("/profile/<username>/frequencies", methods=['GET'])
 def frequencies(username):

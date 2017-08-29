@@ -70,7 +70,7 @@ class User:
 
         user = self.session.get_user(user_id)
         if user is None:
-            cats = json.dumps(self.categories())
+            cats = json.dumps(self.calc_categories())
             user = self.session.create_user(username=screen_name, user_id=user_id, categories=cats)
 
 
@@ -89,22 +89,20 @@ class User:
         candidates = self.nlp.openie_relation(statuses, ['live in'])
         return candidates
 
+    def frequencies(self):
+        self.session.get_frequencies()
+
     def categories(self):
+        self.session.get_categories()
+
+    def calc_categories(self):
+
         statuses = self.get_statuses()
-        # TODO: get category hierarchy from enwiki  database
-        return {"interests":
-            {"Sports":
-                {
-                    "Baseball" : [],
-                    "Track and Field" : ["800m"]
-                },
-            "Creative":
-                {
-                    "Writing" : {"Fiction" : ["Poetry", "Short stories"]}
-                },
-            "Formal studies": ["Mathematics"]
-            }
-        }
+        candidates = self.nlp.entities(statuses)
+        categories = self.session.categories_from_candidates(candidates)
+
+        self.session.save_frequencies(categories.get_frequencies())
+        return categories.to_json()
 
 
     def get_statuses(self):
