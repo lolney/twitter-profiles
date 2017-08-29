@@ -4,6 +4,7 @@ from textblob.taggers import NLTKTagger
 from textblob.parsers import PatternParser
 import tweets
 import pattern
+import json
 from pattern.text import find_relations
 from corenlp import NLPWrapper
 from wikipedia import DBSession
@@ -50,15 +51,28 @@ def parse_pattern(lst):
 
 class User:
 
-    def __init__(self, user=None, screen_name=None, create=False):
-        if user is None and screen_name is None:
+    def __init__(self, user_id=None, screen_name=None):
+        if user_id is None and screen_name is None:
             raise ValueError("Must initialize with either user id or screen name")
-        if create:
 
-        self.session = DBSession()
-        self.screen_name = screen_name
-        self.user = user
+        self.session = DBSession() 
         self.nlp = NLPWrapper()
+        self.api = tweets.TwitterAPI()
+        self.statuses = None
+
+        if screen_name is None:
+            screen_name = self.api.get_screen_name(user_id)
+        else:
+            user_id = self.api.get_user(screen_name)
+
+        self.screen_name = screen_name
+        self.user = user_id
+
+        user = self.session.get_user(user_id)
+        if user is None:
+            cats = json.dumps(self.categories())
+            user = self.session.create_user(username=screen_name, user_id=user_id, categories=cats)
+
 
     def profession(self):
         extractor = ConllExtractor()
@@ -77,18 +91,36 @@ class User:
 
     def categories(self):
         statuses = self.get_statuses()
+        # TODO: get category hierarchy from enwiki  database
+        return {"interests":
+            {"Sports":
+                {
+                    "Baseball" : [],
+                    "Track and Field" : ["800m"]
+                },
+            "Creative":
+                {
+                    "Writing" : {"Fiction" : ["Poetry", "Short stories"]}
+                },
+            "Formal studies": ["Mathematics"]
+            }
+        }
 
 
     def get_statuses(self):
-        if self.screen_name is not None:
-            return [status.text for status in tweets.get_statuses(screen_name=self.screen_name)]
-        elif self.user is not None:
-            return [status.text for status in tweets.get_statuses(self.user)]
+        if self.statuses is None:
+            if self.screen_name is not None:
+                self.statuses = [status.text for status in self.api.get_statuses(screen_name=self.screen_name)]
+            elif self.user is not None:
+                self.statuses = [status.text for status in self.api.get_statuses(self.user)]
+
+        return self.statuses
 
 def trump_test():
     extractor = ConllExtractor()
     nltk_tagger = NLTKTagger()
-    statuses = tweets.get_statuses(user=25073877)
+    api = twitter.TwitterAPI()
+    statuses = api.get_statuses(user=25073877)
 
     for status in statuses:
         tweet = TextBlob(status.text, np_extractor=extractor, pos_tagger=nltk_tagger)

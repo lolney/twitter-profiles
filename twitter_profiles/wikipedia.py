@@ -1,7 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, MetaData, Table
+from sqlalchemy import create_engine, Column, Integer, String, MetaData, Table, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import mapper, sessionmaker
-import re
+from sqlalchemy.engine.url import URL
+import re, os
 
 """
 Base = declarative_base()
@@ -19,7 +20,11 @@ class Categorylinks(object):
 class Page(object):
     pass
 
-def loadSession(url, classnames, names):   
+def create_sessionmaker():
+    url = URL('mysql', username='root', password=os.environ.get("ENWIKIPASSWORD", None), host='localhost', database='enwiki')
+    classnames = [Categorylinks, Page]
+    names = ['categorylinks', 'page']
+
     engine = create_engine(url, echo=True)
     Base.metadata.create_all(engine)
  
@@ -29,8 +34,7 @@ def loadSession(url, classnames, names):
         mapper(classname, table)
  
     Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
+    return Session
 
 Base = declarative_base()
 class FilteredCategory(Base):
@@ -44,7 +48,19 @@ class FilteredCategory(Base):
 class User(Base):
 
     __tablename__ = 'users'
-    
+
+    user_id = Column(Integer, primary_key=True)
+    username = Column(String(255))
+    categories = Column(JSON)
+
+class Interests(Base):
+    __tablename__ = 'interests'
+
+    user_id = Column(Integer)
+    interest = Column(String(255), primary_key=True)
+    weight = Column(Integer)
+
+Session = create_sessionmaker()
 
 class Category():
 
@@ -66,7 +82,7 @@ class Category():
 class DBSession():
 
     def __init__(self):
-        self.session = loadSession('mysql://root:xxx@localhost/enwiki', [Categorylinks, Page], ['categorylinks', 'page'])
+        self.session = Session()
 
     # From a list of candidate strings, find the root candidates and significance counts
     def categories_from_candidates(self, candidates):
@@ -127,6 +143,15 @@ class DBSession():
 
         self.session.commit()
         print self.session.query(FilteredCategory).limit(10)
+
+    def create_user(self, username, user_id, categories):
+        user = User(username=username, user_id=user_id, categories=categories)
+        self.session.add(user)
+        self.session.commit()
+        return user
+
+    def get_user(self, user_id):
+        return self.session.query(User).filter_by(user_id = user_id).one_or_none()
 
     def getCategories(self):
         return self.session.query(Categorylinks).join(Page, Page.page_id==Categorylinks.cl_from).limit(10)

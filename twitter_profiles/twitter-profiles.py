@@ -1,9 +1,26 @@
 import StringIO
 import csv
+from twitter import TwitterError
 from flask import Flask, render_template, request, jsonify, make_response
 from user import User
-from twitter import TwitterError
+
+class Users:
+
+    def __init__(self):
+        self.users = {}
+
+    def get_user(self, screen_name):
+        key = screen_name.lower()
+        try:
+            res = self.users[key]
+            return res
+        except:
+            user = User(screen_name=screen_name)
+            self.users[key] = user
+            return user
+
 app = Flask(__name__)
+users = Users()
 
 @app.route("/")
 def hello():
@@ -11,7 +28,11 @@ def hello():
 
 @app.route("/profile/<username>")
 def profile(username):
-    user = User(screen_name=username)
+    try:
+        user = users.get_user(username)
+    except TwitterError as e:
+        return e[0][0]['message'], 400
+
     try:
         profession = user.profession()
         interests = user.interests()
@@ -31,10 +52,10 @@ def profile(username):
 @app.route('/username/<username>', methods=['PUT'])
 def username(username):
     try:
-        user = User(screen_name=username, create=True)
+        user = users.get_user(username)
         return "", 200
-    except TwitterError:
-        return "Twitter username does not exist", 400
+    except TwitterError as e:
+        return str(e), 400
 
 @app.route("/profile/<username>/frequencies", methods=['GET'])
 def frequencies(username):
@@ -58,19 +79,7 @@ def categories_csv(username):
     return output
 
 def get_categories(username):
-    return {"interests":
-        {"Sports":
-            {
-                "Baseball" : [],
-                "Track and Field" : ["800m"]
-            },
-        "Creative":
-            {
-                "Writing" : {"Fiction" : ["Poetry", "Short stories"]}
-            },
-        "Formal studies": ["Mathematics"]
-        }
-    }
+    return users.get_user(username).categories()
 
 def formatcats(super, cats):
     ret = []

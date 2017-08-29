@@ -5,7 +5,11 @@ Download the CoreNLP library from https://stanfordnlp.github.io/CoreNLP/, then n
 ``` java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 150000 ```
 
 # Setting up the database
+Install MySQL. On Linux:
+```apt-get install python-dev libmysqlclient-dev
+pip install MySQL-python```
 
+Create the relevant tables from the 'page' and 'categorylinks' Wikipedia dumps:
 ``` sh database.sh ```
 
 Run the mysql daemon:

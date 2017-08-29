@@ -39,7 +39,7 @@ class NLPWrapper:
         sentences = self.openie(text)
         return sentences
 
-def test():
+def print_example():
     with open(CORENLP_DIRECTORY + "/presidents.txt.json") as fp:
         result = json.load(fp)
         for sentence in result["sentences"]:
