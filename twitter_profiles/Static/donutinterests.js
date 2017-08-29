@@ -1,4 +1,7 @@
-$.get("http://localhost:5000/profile/Test/frequencies", function(interests, status){
+path = location.path.split('/');
+username = path[2];
+
+$.get("http://localhost:5000/profile/" + username + "/frequencies", function(interests, status){
 
 var chart = bb.generate({
     data: {
