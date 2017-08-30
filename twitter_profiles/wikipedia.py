@@ -188,6 +188,7 @@ class DBSession():
         seeds = ["Research","Culture","Arts","Places","Geography","Health","Self_care","Healthcare_occupations","History","Events","Formal_sciences","Natural_sciences","People","Personal_life","Self","Philosophy","Thought","Religion","Technology","Society"]
         visited = set()
         for seed in seeds:
+            print "Constructing hierarchy for " + seed
             page_id = self.session.query(Page).filter_by(page_title = seed).filter_by(page_namespace = 14).one().page_id
             visited.add(page_id)
             self.traverse_down(visited, page_id, seed)

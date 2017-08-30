@@ -3,6 +3,29 @@ import json
 
 CORENLP_DIRECTORY = r'/Users/Luke/Downloads/stanford-corenlp-full-2017-06-09'
 
+class Compounds:
+
+    def __init__(self, sentence):
+        self.compounds_list = filter(lambda x: x['dep'] == 'compound', sentence['basicDependencies'])
+        self.compounds_dict = {}
+
+    def try_insert(self, token):
+        for compound in self.compounds_list:
+            if compound['governor'] == token['index'] or compound['dependent'] == token['index']:
+                    try:
+                        self.compounds_dict[compound['governor']].append(token)
+                    except:
+                        self.compounds_dict[compound['governor']] = [token]
+                    return True
+        return False
+
+    def return_list(self):
+        tokens_groupings = [sorted(x, lambda a,b: cmp(a['index'],b['index']))
+            for x in self.compounds_dict.values()]
+        words = [[token['word'] for token in tokens] for tokens in tokens_groupings]
+        return map(lambda x: " ".join(x), words)
+
+
 class NLPWrapper:
 
     def __init__(self):
@@ -34,10 +57,25 @@ class NLPWrapper:
         filtered = filter(lambda s : s['relation'] in relations, sentences)
         return [s['object'] for s in filtered]
 
+    def extract_nouns(self, output):
+        nouns = []
+        for sentence in output['sentences']:
+            compounds = Compounds(sentence)
+            for token in sentence['tokens']:
+                if token['pos'] in ['NNP','VBG','NN']:
+                    word = token['word']
+                    inserted = compounds.try_insert(token)
+                    if not inserted:
+                        nouns.append(word)
+            nouns += compounds.return_list()
+        return nouns
+                    
+
     def entities(self, tweets):
         text = self.clean_tweets(tweets)
-        sentences = self.openie(text)
-        return sentences
+        output = self.nlp.annotate(text, properties=
+        {'annotators': 'tokenize,ssplit,pos,depparse','outputFormat':'json'});
+        return self.extract_nouns(output)
 
 def print_example():
     with open(CORENLP_DIRECTORY + "/presidents.txt.json") as fp:
@@ -73,8 +111,13 @@ class ParseTree:
         self.pos = pos
 
 def main():
-    nlp = NLPWrapper()
-    print nlp.entities(["I am a professional photographer who lives in Boise, ID", "The quick brown fox jumped over the lazy dog.", "I like barn raising."])
+    print "empty"
 
 if __name__ == "__main__":
     main()
+
+def test_nouns():
+    nlp = NLPWrapper()
+    tweets = ["My name is Ho Chi Mihn from New York", "I like barn raising and flying."]
+    answers = sorted(['name', "New York","Ho Chi Mihn", "barn raising","flying"])
+    assert sorted(nlp.entities(tweets)) == answers
