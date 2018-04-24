@@ -172,6 +172,50 @@ class DBSession():
         else:
             return Category(name=text,parent=traverse_up(session, cat.cl_to))
 
+    def traversal_query():
+        return 0
+        #WITH RECURSIVE tree (id, title, level, parent_id)
+        #AS (
+        #    SELECT
+        #        super_id,
+        #        cl_to,
+        #        0,
+        #        NULL
+        #        FROM (
+        #                SELECT SUPER.page_id AS super_id, categorylinks.cl_to, categorylinks.cl_from, SUB.page_title
+        #                FROM categorylinks 
+        #                INNER JOIN page SUB ON categorylinks.cl_from=SUB.page_id 
+        #                INNER JOIN page SUPER on categorylinks.cl_to=SUPER.page_title
+        #                WHERE SUPER.page_namespace=14 AND cl_to='Research'
+        #            ) joined
+#
+#        #    UNION
+#        #    SELECT
+#        #        sub.cl_from,
+#        #        sub.page_title,
+#        #        super.level + 1,
+#        #        sub.cl_to
+#        #    FROM tree super, (
+#        #            SELECT MIN(SUPER.page_id) AS super_id, categorylinks.cl_to, categorylinks.cl_from, SUB.page_title
+#        #            FROM categorylinks
+#        #            INNER JOIN page SUB ON categorylinks.cl_from=SUB.page_id 
+#        #            INNER JOIN page SUPER on categorylinks.cl_to=SUPER.page_title
+#        #            GROUP BY categorylinks.cl_to, categorylinks.cl_from, SUB.page_title
+#        #        ) sub
+#        #    WHERE sub.super_id=super.id AND super.level < 3
+#        #)
+#        #SELECT * FROM tree
+#        #ORDER BY level
+#        #LIMIT 30;
+#
+        #SELECT COUNT(SUPER.page_id)
+
+        # Need to:
+        # Eliminte all but one cl_to for a particular cl_from
+        # Base this on the number of subcategories of the cl_to
+        # Prevent cycles - prevent a category from showing up again
+
+
     def traverse_down(self, visited, supercat_id, supercat):
         # 14 is the category namespace; 0 is the page namespace
         subcat_ids = [s.cl_from for s in self.session.query(Categorylinks).filter_by(cl_to = supercat)]
@@ -185,7 +229,7 @@ class DBSession():
                 
     # Seed top level categories
     def createCats(self):
-        seeds = ["Research","Culture","Arts","Places","Geography","Health","Self_care","Healthcare_occupations","History","Events","Formal_sciences","Natural_sciences","People","Personal_life","Self","Philosophy","Thought","Religion","Technology","Society"]
+        seeds = ["Research"]#["Research","Culture","Arts","Places","Geography","Health","Self_care","Healthcare_occupations","History","Events","Formal_sciences","Natural_sciences","People","Personal_life","Self","Philosophy","Thought","Religion","Technology","Society"]
         visited = set()
         for seed in seeds:
             print "Constructing hierarchy for " + seed
